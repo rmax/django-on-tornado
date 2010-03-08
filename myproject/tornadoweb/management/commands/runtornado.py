@@ -4,7 +4,11 @@ import os
 import sys
  
 class Command(BaseCommand):
-    option_list = BaseCommand.option_list + ()
+    option_list = BaseCommand.option_list + (
+        make_option('--reload', action='store_true',
+            dest='use_reloader', default=False,
+            help="Tells Tornado to use auto-reloader"),
+    )
     help = "Starts a Tornado Web."
     args = '[optional port number, or ipaddr:port]'
  
@@ -32,6 +36,7 @@ class Command(BaseCommand):
         if not port.isdigit():
             raise CommandError("%r is not a valid port number." % port)
  
+        use_reloader = options.get('use_reloader', False)
         quit_command = (sys.platform == 'win32') and 'CTRL-BREAK' or 'CONTROL-C'
  
         def inner_run():
@@ -47,4 +52,9 @@ class Command(BaseCommand):
             http_server.listen(int(port), address=addr)
             ioloop.IOLoop.instance().start()
  
+        if use_reloader:
+            # Use tornado reload to handle IOLoop restarting
+            from tornado import autoreload
+            autoreload.start()
+
         inner_run()
