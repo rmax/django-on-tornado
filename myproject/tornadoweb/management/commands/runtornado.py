@@ -21,7 +21,7 @@ class Command(BaseCommand):
         from tornado import httpserver, wsgi, ioloop
  
         # reopen stdout/stderr file descriptor with write mode
-        # and 0 as the buffer size (unbuffered)
+        # and 0 as the buffer size (unbuffered).
         # XXX: why?
         sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
         sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 0)
@@ -62,11 +62,13 @@ class Command(BaseCommand):
             application = WSGIHandler()
             container = wsgi.WSGIContainer(application)
             http_server = httpserver.HTTPServer(container)
+            # start tornado web server in single-threaded mode
+            # instead auto pre-fork mode with bind/start.
             http_server.listen(int(port), address=addr)
             ioloop.IOLoop.instance().start()
  
         if use_reloader:
-            # Use tornado reload to handle IOLoop restarting
+            # Use tornado reload to handle IOLoop restarting.
             from tornado import autoreload
             autoreload.start()
 
