@@ -47,11 +47,18 @@ class Command(BaseCommand):
  
         def inner_run():
             from django.conf import settings
+            from django.utils import translation
             print "Validating models..."
             self.validate(display_num_errors=True)
             print "\nDjango version %s, using settings %r" % (django.get_version(), settings.SETTINGS_MODULE)
             print "Server is running at http://%s:%s/" % (addr, port)
             print "Quit the server with %s." % quit_command
+
+            # django.core.management.base forces the locate to en-us. We
+            # should set it up correctly for the first request
+            # (particularly important in the not "--reload" case).
+            translation.activate(settings.LANGUAGE_CODE)
+
             application = WSGIHandler()
             container = wsgi.WSGIContainer(application)
             http_server = httpserver.HTTPServer(container)
