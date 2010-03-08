@@ -7,15 +7,18 @@ class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--reload', action='store_true',
             dest='use_reloader', default=False,
-            help="Tells Tornado to use auto-reloader"),
+            help="Tells Tornado to use auto-reloader."),
         make_option('--admin', action='store_true',
             dest='admin_media', default=False,
-            help="Serve admin media"),
+            help="Serve admin media."),
         make_option('--adminmedia', dest='admin_media_path', default='',
             help="Specifies the directory from which to serve admin media."),
         make_option('--noxheaders', action='store_false',
             dest='xheaders', default=True,
-            help="Tells Tornado to NOT override remote IP with X-Real-IP"),
+            help="Tells Tornado to NOT override remote IP with X-Real-IP."),
+        make_option('--nokeepalive', action='store_true',
+            dest='no_keep_alive', default=False,
+            help="Tells Tornado to NOT keep alive http connections."),
     )
     help = "Starts a Tornado Web."
     args = '[optional port number, or ipaddr:port]'
@@ -56,6 +59,7 @@ class Command(BaseCommand):
         admin_media_path = options.get('admin_media_path', '')
 
         xheaders = options.get('xheaders', True)
+        no_keep_alive = options.get('no_keep_alive', False)
 
         shutdown_message = options.get('shutdown_message', '')
         quit_command = (sys.platform == 'win32') and 'CTRL-BREAK' or 'CONTROL-C'
@@ -92,7 +96,8 @@ class Command(BaseCommand):
                 # start tornado web server in single-threaded mode
                 # instead auto pre-fork mode with bind/start.
                 http_server = httpserver.HTTPServer(container,
-                                                    xheaders=xheaders)
+                                                xheaders=xheaders,
+                                                no_keep_alive=no_keep_alive)
                 http_server.listen(int(port), address=addr)
 
                 ioloop.IOLoop.instance().start()
