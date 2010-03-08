@@ -11,6 +11,9 @@ class Command(BaseCommand):
     )
     help = "Starts a Tornado Web."
     args = '[optional port number, or ipaddr:port]'
+
+    # Validation is called explicitly each time the server is reloaded.
+    requires_model_validation = False
  
     def handle(self, addrport='', *args, **options):
         import django
