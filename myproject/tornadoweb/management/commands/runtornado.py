@@ -43,6 +43,7 @@ class Command(BaseCommand):
             raise CommandError("%r is not a valid port number." % port)
  
         use_reloader = options.get('use_reloader', False)
+        shutdown_message = options.get('shutdown_message', '')
         quit_command = (sys.platform == 'win32') and 'CTRL-BREAK' or 'CONTROL-C'
  
         def inner_run():
@@ -70,6 +71,8 @@ class Command(BaseCommand):
 
                 ioloop.IOLoop.instance().start()
             except KeyboardInterrupt:
+                if shutdown_message:
+                    print shutdown_message
                 sys.exit(0)
  
         if use_reloader:
