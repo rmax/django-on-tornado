@@ -11,8 +11,8 @@ Instructions
 
  1. ``cd myproject``
  2. ``python manage.py syncdb``
- 2. ``python manage.py runtornado --reload --admin``
- 3. Go to: http://localhost:8000/admin/
+ 3. ``python manage.py runtornado --reload --admin``
+ 4. Go to: http://localhost:8000/admin/
 
 ToDo
 ====
