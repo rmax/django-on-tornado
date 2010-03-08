@@ -17,6 +17,9 @@ class Command(BaseCommand):
         from django.core.handlers.wsgi import WSGIHandler
         from tornado import httpserver, wsgi, ioloop
  
+        # reopen stdout/stderr file descriptor with write mode
+        # and 0 as the buffer size (unbuffered)
+        # XXX: why?
         sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
         sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 0)
  
