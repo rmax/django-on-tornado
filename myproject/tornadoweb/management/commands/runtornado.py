@@ -13,6 +13,9 @@ class Command(BaseCommand):
             help="Serve admin media"),
         make_option('--adminmedia', dest='admin_media_path', default='',
             help="Specifies the directory from which to serve admin media."),
+        make_option('--noxheaders', action='store_false',
+            dest='xheaders', default=True,
+            help="Tells Tornado to NOT override remote IP with X-Real-IP"),
     )
     help = "Starts a Tornado Web."
     args = '[optional port number, or ipaddr:port]'
@@ -48,8 +51,12 @@ class Command(BaseCommand):
             raise CommandError("%r is not a valid port number." % port)
  
         use_reloader = options.get('use_reloader', False)
+
         serve_admin_media = options.get('admin_media', False)
         admin_media_path = options.get('admin_media_path', '')
+
+        xheaders = options.get('xheaders', True)
+
         shutdown_message = options.get('shutdown_message', '')
         quit_command = (sys.platform == 'win32') and 'CTRL-BREAK' or 'CONTROL-C'
  
@@ -84,7 +91,8 @@ class Command(BaseCommand):
 
                 # start tornado web server in single-threaded mode
                 # instead auto pre-fork mode with bind/start.
-                http_server = httpserver.HTTPServer(container)
+                http_server = httpserver.HTTPServer(container,
+                                                    xheaders=xheaders)
                 http_server.listen(int(port), address=addr)
 
                 ioloop.IOLoop.instance().start()
