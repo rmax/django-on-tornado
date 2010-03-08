@@ -59,13 +59,18 @@ class Command(BaseCommand):
             # (particularly important in the not "--reload" case).
             translation.activate(settings.LANGUAGE_CODE)
 
-            application = WSGIHandler()
-            container = wsgi.WSGIContainer(application)
-            http_server = httpserver.HTTPServer(container)
-            # start tornado web server in single-threaded mode
-            # instead auto pre-fork mode with bind/start.
-            http_server.listen(int(port), address=addr)
-            ioloop.IOLoop.instance().start()
+            try:
+                application = WSGIHandler()
+                container = wsgi.WSGIContainer(application)
+
+                # start tornado web server in single-threaded mode
+                # instead auto pre-fork mode with bind/start.
+                http_server = httpserver.HTTPServer(container)
+                http_server.listen(int(port), address=addr)
+
+                ioloop.IOLoop.instance().start()
+            except KeyboardInterrupt:
+                sys.exit(0)
  
         if use_reloader:
             # Use tornado reload to handle IOLoop restarting.
