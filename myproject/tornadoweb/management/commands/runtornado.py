@@ -8,6 +8,11 @@ class Command(BaseCommand):
         make_option('--reload', action='store_true',
             dest='use_reloader', default=False,
             help="Tells Tornado to use auto-reloader"),
+        make_option('--admin', action='store_true',
+            dest='admin_media', default=False,
+            help="Serve admin media"),
+        make_option('--adminmedia', dest='admin_media_path', default='',
+            help="Specifies the directory from which to serve admin media."),
     )
     help = "Starts a Tornado Web."
     args = '[optional port number, or ipaddr:port]'
@@ -43,6 +48,8 @@ class Command(BaseCommand):
             raise CommandError("%r is not a valid port number." % port)
  
         use_reloader = options.get('use_reloader', False)
+        serve_admin_media = options.get('admin_media', False)
+        admin_media_path = options.get('admin_media_path', '')
         shutdown_message = options.get('shutdown_message', '')
         quit_command = (sys.platform == 'win32') and 'CTRL-BREAK' or 'CONTROL-C'
  
@@ -61,7 +68,18 @@ class Command(BaseCommand):
             translation.activate(settings.LANGUAGE_CODE)
 
             try:
-                application = WSGIHandler()
+                # Instance Django's wsgi handler.
+                if serve_admin_media:
+                    # Enable admin media wsgi middleware.
+                    # Only use it in development mode!.
+                    from django.core.servers.basehttp import AdminMediaHandler
+                    application = AdminMediaHandler(WSGIHandler(),
+                                                    admin_media_path)
+                else:
+                    application = WSGIHandler()
+
+                # Wrap Django's wsgi application on Tornado's wsgi
+                # container.
                 container = wsgi.WSGIContainer(application)
 
                 # start tornado web server in single-threaded mode
